@@ -1,7 +1,4 @@
 public with sharing class RecipeTriggerHandler {
-    
-    // Checks to see if the RecipeTriggerHandler has already executed
-    // public static Boolean hasExecuted = false;
 
     // Trigger handler class variables
     List<Recipe__c> newRecipes;
@@ -38,29 +35,51 @@ public with sharing class RecipeTriggerHandler {
         }
    }
 
-   // Process records after update
-   public void handleAfterIsertUpdate() {
-       List<Task> newTasks = new List<Task>();
-       System.Debug('List newTasks: ' + newTasks);
+    // Process records after update
+    public void handleAfterIsertUpdate() {
+    List<Task> newTasks = new List<Task>();
 
-       // Retrieve records where usage records exist for Recipes
-       // Query parent records to pull in the data needed to create a task for review
-       List<Recipe_Usage__c> recipeUsage = [SELECT Id, Recipe__r.Id, Name, Cookbook__r.Id 
+    // Retrieve records where usage records exist for Recipes
+    // Query parent records to pull in the data needed to create a task for review
+    List<Recipe_Usage__c> recipeUsage = [SELECT Id, Recipe__r.Id, Name, Cookbook__r.Id 
                                             FROM Recipe_Usage__c
                                             WHERE Recipe__r.Draft__c = FALSE AND Recipe__r.Id IN :newRecipes];
-        System.debug('List recipeUsage: ' + recipeUsage);
+    System.debug('List recipeUsage: ' + recipeUsage);
 
-        // Loop through recipe records retrieved
-        for(Recipe_Usage__c rec : recipeUsage) {
-            // Add information to new Tasks and store in a list
-            newTasks.add(new Task (Subject = 'Review required',
+    // Loop through recipe records retrieved
+    for(Recipe_Usage__c rec : recipeUsage) {
+        // Add information to new Tasks and store in a list
+        newTasks.add(new Task (Subject = 'Review required',
                                    Priority = 'High',           
                                    WhatId = rec.Cookbook__r.Id,
                                    ActivityDate = system.today().addDays(7)));
-            System.debug('List newTasks: ' + newTasks);
-        }
+        System.debug('List newTasks: ' + newTasks);
+    }
+    
 
-        //Insert Tasks
-        insert newTasks;
-   }
+    /*
+    public void handleAfterInsertUpdate() {
+        Set<Id> cookbooksWithTasks = new Set<Id>();
+        List<Task> newTasks = new List<Task>();
+
+        for(Recipe_Usage__c recipeUsage : [SELECT Recipe__r.Id, Name, Cookbook__r.Id, Recipe__r.Draft__c
+                                  FROM Recipe_Usage__c
+                                  WHERE Recipe__c IN :oldRecipes.keySet()]) {
+            
+            if(recipeUsage.Recipe__r.Draft__c = FALSE) {
+                newTasks.add(new Task (
+                    Subject = 'Review Updated Recipe(s)',
+                    ActivityDate = System.today().addDays(7),
+                    OwnerId = recipeUsage.Cookbook__r.OwnerId,
+                    Priority = 'High',
+                    WhatId = recipeUsage.Cookbook__r.Id
+                    )
+                );
+                cookbooksWithTasks.add(recipeUsage.Cookbook__c);
+            }
+        }
+        */
+        insert newTasks; 
+    }
 }
+
