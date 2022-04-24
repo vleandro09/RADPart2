@@ -11,9 +11,9 @@ trigger RecipeTrigger on Recipe__c (before insert, before update, after insert, 
             }
         } else if (Trigger.isAfter) {
             if(Trigger.isInsert) {
-                handler.handleAfterIsertUpdate();
+                handler.handleAfterInsertUpdate();
             } else if (Trigger.isUpdate) {
-                handler.handleAfterIsertUpdate();
+                handler.handleAfterInsertUpdate();
             }
         }
 

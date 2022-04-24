@@ -1,4 +1,5 @@
 public with sharing class RecipeTriggerHandler {
+    //public class RTHException extends exception{}
 
     // Trigger handler class variables
     List<Recipe__c> newRecipes;
@@ -21,10 +22,16 @@ public with sharing class RecipeTriggerHandler {
                recipe.Description__c == null ||
                recipe.Active_Time_Units__c == null ||
                recipe.Servings__c == null) {
-                   recipe.Draft__c = true;
-               }
-            
-            // Check the complexity of a recipe before it's inserted or updated
+                recipe.Draft__c = true;
+                //throw new RTHException('Required field(s) are null.');
+            }
+            /*
+            if(recipe.Draft__c = true) {
+                recipe.addError('Fields cannot be null.');
+            }
+            */
+
+        // Check the complexity of a recipe before it's inserted or updated
             if(HelperFunctions.rateRecipeComplexity(recipe) == 1) {
                 recipe.Complexity__c = 'Simple';
             } if (HelperFunctions.rateRecipeComplexity(recipe) == 2) {
@@ -32,11 +39,11 @@ public with sharing class RecipeTriggerHandler {
             } if (HelperFunctions.rateRecipeComplexity(recipe) == 3) {
                 recipe.Complexity__c = 'Difficult';
             }
-        }
+        }       
    }
 
     // Process records after update
-    public void handleAfterIsertUpdate() {
+    public void handleAfterInsertUpdate() {
     List<Task> newTasks = new List<Task>();
 
     // Retrieve records where usage records exist for Recipes
